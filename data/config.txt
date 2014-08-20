@@ -1,0 +1,6 @@
+player_card_turnable=1
+cards_unturnable=0
+
+shoe_file=game422.txt
+format=circular
+
