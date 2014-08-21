@@ -182,7 +182,7 @@ public class PictureHandle
         if (overAZone) {
           relocating_zone = app.cards_zones_names.get(next_zone_index); // gets zone name from index
           app.handHistory.append(app.ZONES_MOVES.get(relocating_zone) );
-          //println("Player " + app.cplayer + " moved: "+app.ZONES_MOVES.get(relocating_zone ) );
+          app.println("Player " + app.cplayer + " moved: "+app.ZONES_MOVES.get(relocating_zone ) );
           
           relocate(); // relocate myself
           PictureHandle neighbor = app.hlist.get(app.zones_cards.get(relocating_zone )); // the card (by name) currently in the zone where we are moving 
@@ -195,14 +195,14 @@ public class PictureHandle
             app.total_moves += app.moves_counter;
             app.moves_counter = 0;
             if (app.runs_counter > app.MAX_RUNS) { // Game ends
-              //println("Game session ended.\n");
-              // println();
+              app.println("Game session ended.\n");
+              app.println();
               /* reset: */
               app.total_moves=0;
               app.runs_counter=0;
             }
 
-            //println("Hands successfull:\n"+app.handHistory.toString()+"\nGenerating a new hand.");
+            app.println("Hands successfull:\n"+app.handHistory.toString()+"\nGenerating a new hand.");
             app.handHistory.setLength(0 ); // resets
             app.replaceHandles(); // generate a new (random) run
           } else if (app.cplayer.equals("ck" )) app.cplayer="nk";
