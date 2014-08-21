@@ -5,11 +5,14 @@ import java.util.Arrays;
 /**
  Handles demo: A first implementaion on the Target the Two (TTT) card game.
  */
+public class bengames extends PApplet {
+	
+//PApplet benSim = this;
 
-PApplet benSim = this;
+static StringBuilder handHistory = new StringBuilder(); // hystory of players moves
 
 static final String SHOE_FILE_CFG="shoe_file";
-static final String FORMAT_CFG="format"; // shoe file and output format, "linear" is default
+static final String FORMAT_CFG=	"format"; // shoe file and output format, "linear" is default
 
 final int HANDLE_NB = 6;
 final int CARD_WIDTH = 70;
@@ -100,17 +103,17 @@ int moves_counter=0; // number of moves
 int total_moves = 0; // total number of moves
 int runs_counter = 1; //number of runs
 
-Configuration config;
+public Configuration config;
 HandleList hlist = new HandleList(false);
 
 PFont font;
 
-void setup()
+public void setup()
 {
   size(640, 480);
   smooth();
   font = createFont("Arial", 16, true);
-  config = new Configuration();
+  config = new Configuration(this);
   shoe_filename = config.getParamValue(SHOE_FILE_CFG);
   if (shoe_filename != null){
     println("Opening file: " + shoe_filename);
@@ -125,13 +128,13 @@ void setup()
   // Create random handles
   for (int i = 0; i < HANDLE_NB; i++)
   {
-    hlist.add(new PictureHandle(HOME_CARDS_COORDINATES[i+i], HOME_CARDS_COORDINATES[i+i+1], 70, 100, 
+    hlist.add(new PictureHandle(this, HOME_CARDS_COORDINATES[i+i], HOME_CARDS_COORDINATES[i+i+1], 70, 100, 
     #FFFF00, #FF8800, "card_back_blue.jpeg", cards_files[i], cards_names[i], cards_zones_names.get(i), TTT_COVERED_CARDS[i]));
     zones_cards.put(cards_zones_names.get(i), cards_names[i]);
   }
 }
 
-void draw()
+public void draw()
 {
   background(0, 102, 51);
 
@@ -171,7 +174,7 @@ void draw()
   hlist.update();
 }
 
-void keyPressed() {
+public void keyPressed() {
   if (key == 'n') {
     hlist.reset();
     replaceHandles();
@@ -189,7 +192,7 @@ void keyPressed() {
 
 /** Generate a new set of handles (cards) in random positions or using the shoe file if any.
  */
-void replaceHandles() {
+public void replaceHandles() {
   if (shoe_filename == null) {
     shuffleArray(cards_names);
     println(cards_names);
@@ -202,7 +205,7 @@ void replaceHandles() {
     }
 
     for (int i=0; i< cards_names.length; i++) {
-      hlist.add(new PictureHandle(HOME_CARDS_COORDINATES[i+i], HOME_CARDS_COORDINATES[i+i+1], 70, 100, 
+      hlist.add(new PictureHandle(this, HOME_CARDS_COORDINATES[i+i], HOME_CARDS_COORDINATES[i+i+1], 70, 100, 
       #FFFF00, #FF8800, "card_back_blue.jpeg", cards_names_files.get(cards_names[i]), cards_names[i], cards_zones_names.get(i), TTT_COVERED_CARDS[i]));
       zones_cards.put(cards_zones_names.get(i), cards_names[i] );
     }
@@ -222,14 +225,14 @@ void replaceHandles() {
       println(cards_names);
       if (format.equals("circular")){
         for (int i = 0 ; i< 6 ; i++){
-          hlist.add(new PictureHandle(HOME_CARDS_COORDINATES[i+i], HOME_CARDS_COORDINATES[i+i+1], 70, 100, 
+          hlist.add(new PictureHandle(this, HOME_CARDS_COORDINATES[i+i], HOME_CARDS_COORDINATES[i+i+1], 70, 100, 
           #FFFF00, #FF8800, "card_back_blue.jpeg", cards_names_files.get(cards_names[i]), cards_names[i], CIRCULAR_CARD_LAYOUT[i], TTT_COVERED_CARDS[i]));
           zones_cards.put(CIRCULAR_CARD_LAYOUT[i], cards_names[i] );
         }
       }
       else{
         for (int i = 0 ; i< 6 ; i++) {
-          hlist.add(new PictureHandle(HOME_CARDS_COORDINATES[i+i], HOME_CARDS_COORDINATES[i+i+1], 70, 100, 
+          hlist.add(new PictureHandle(this, HOME_CARDS_COORDINATES[i+i], HOME_CARDS_COORDINATES[i+i+1], 70, 100, 
           #FFFF00, #FF8800, "card_back_blue.jpeg", cards_names_files.get(cards_names[i]), cards_names[i], LINEAR_CARD_LAYOUT[i], TTT_COVERED_CARDS[i]));
           zones_cards.put(LINEAR_CARD_LAYOUT[i], cards_names[i] );
         }
@@ -240,13 +243,13 @@ void replaceHandles() {
   }
 }
 
-String[] parseShoeLine(String line) {
+public String[] parseShoeLine(String line) {
   line = line.trim();
   line = line.toLowerCase();
   return line.split("\\s+");
 }
 
-void shuffleArray(Object[] ar)
+public void shuffleArray(Object[] ar)
 {
   for (int i = ar.length - 1; i > 0; i--)
   {
@@ -256,4 +259,6 @@ void shuffleArray(Object[] ar)
     ar[index] = ar[i];
     ar[i] = a;
   }
+}
+
 }
