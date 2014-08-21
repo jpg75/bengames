@@ -1,12 +1,15 @@
+import java.util.HashMap;
+
 /**
  * A list of handles.
  */
-class HandleList
+public class HandleList
 {
+  
   private HashMap<String, PictureHandle> handles = new HashMap<String, PictureHandle>();
   private boolean m_bDragging;
   private boolean m_bGroupDragging; // True if you want to be able to drag several handles at once (if they are on the same position)
-
+  
   HandleList() // Empty constructor
   {
   }

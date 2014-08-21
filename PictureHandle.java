@@ -1,16 +1,18 @@
-static final float EASING = 0.20;
-static private int id_name = 0; // used as name when not provided in contructor
-static StringBuilder handHistory = new StringBuilder(); // hystory of players moves
-  
+//import processing.core.PApplet;
+import processing.core.PImage;
+
 /**
  * A (configurable) picture that can be dragged with the mouse.
  */
-class PictureHandle 
+public class PictureHandle 
 {
   /* "config.txt" Parameter managing the chance to turn the other player card */
   static final String PLAYER_CARD_TURNABLE = "player_card_turnable";  
   static final String CARDS_UNTURNABLE="cards_unturnable";
-  
+  static private int id_name = 0; // used as name when not provided in constructor
+  static float EASING = 0.20f;
+
+  bengames app = null; //reference to the Processing app engine  
   // Lazy (Processing) class: leave direct access to parameters... Avoids having lot of accessors.
   String name; // Agent name
   String zone;
@@ -19,8 +21,8 @@ class PictureHandle
 
   float m_x, m_y; // Position of handle
   int width_img, height_img; // width and height with which to display the pictures
-  color m_colorHover;
-  color m_colorDrag;
+  int m_colorHover;
+  int m_colorDrag;
 
   private boolean m_bIsHovered, m_bDragged, flipImg, relocating;
   private String relocating_zone;
@@ -32,9 +34,9 @@ class PictureHandle
   /**
    * Simple constructor with hopefully sensible defaults.
    */
-  PictureHandle(float x, float y)
+  PictureHandle(bengames pa, float x, float y)
   {
-    this(x, y, 70, 100, #FFFF00, #FF8800, "card_back_blue.jpeg", "card_back_red.jpeg", String.valueOf(id_name), "dummy_zone", false);
+    this(pa, x, y, 70, 100, pa.color(255,255,0), pa.color(255,136,0), "card_back_blue.jpeg", "card_back_red.jpeg", String.valueOf(id_name), "dummy_zone", false);
   }
 
   /**
@@ -43,11 +45,12 @@ class PictureHandle
    * @param x, y location on the screen window
    * @param width_img, height_img actual x, y size of the displayed image (the picture is scaled when displayed)
    */
-  PictureHandle(float x, float y, int width_img, int height_img, 
-  color colorHover, color colorDrag, String back_image_file, String front_image_file, String name, String zoneName, boolean covered
+  PictureHandle(bengames pa, float x, float y, int width_img, int height_img, 
+  int colorHover, int colorDrag, String back_image_file, String front_image_file, String name, String zoneName, boolean covered
     )
   {
     //super(x,y);
+    this.app = pa;
     this.name = name;
     zone = zoneName;
     colorName = name.substring(2); // infer from agent name
@@ -58,15 +61,15 @@ class PictureHandle
     this.height_img = height_img; // height on screen
     m_colorHover = colorHover; // color when hovering
     m_colorDrag = colorDrag; // color when dragging
-    back_img = loadImage(back_image_file); 
-    front_img = loadImage(front_image_file);
+    back_img = app.loadImage(back_image_file); 
+    front_img = app.loadImage(front_image_file);
     
-    String parValue = config.getParamValue(PLAYER_CARD_TURNABLE);
+    String parValue = app.config.getParamValue(PLAYER_CARD_TURNABLE);
     if (parValue.equals("1"))
       player_card_turnable=true;
     else player_card_turnable=false;
 
-    parValue = config.getParamValue(CARDS_UNTURNABLE);
+    parValue = app.config.getParamValue(CARDS_UNTURNABLE);
     if (parValue.equals("1"))
       cards_unturnable=true;
     else cards_unturnable=false;
@@ -87,13 +90,13 @@ class PictureHandle
   void update(boolean bAlreadyDragging)
   { 
     /* GAME CHECK: flip the card according to turn, player and zone: */
-    if (zone.equals("Color" ) && cplayer.equals("nk" ) )
+    if (zone.equals("Color" ) && app.cplayer.equals("nk" ) )
       flipImg=true;
-    else if (zone.equals("Color" ) && cplayer.equals("ck" ))
+    else if (zone.equals("Color" ) && app.cplayer.equals("ck" ))
       flipImg=false;
-    else if (zone.equals("Number" ) && cplayer.equals("ck" ))
+    else if (zone.equals("Number" ) && app.cplayer.equals("ck" ))
       flipImg=true;
-    else if (zone.equals("Number" ) && cplayer.equals("nk" ))
+    else if (zone.equals("Number" ) && app.cplayer.equals("nk" ))
       flipImg=false;
     else if (zone.equals("DownC") || (zone.equals("DownN")) ) 
       flipImg = true;
@@ -107,58 +110,58 @@ class PictureHandle
 
     else {       
       // Check if mouse is over the handle
-      if (mouseX > m_x && mouseX < m_x + width_img &&
-        mouseY > m_y && mouseY < m_y + height_img)
+      if (app.mouseX > m_x && app.mouseX < m_x + width_img &&
+        app.mouseY > m_y && app.mouseY < m_y + height_img)
         m_bIsHovered = true;
       else
         m_bIsHovered= false; 
 
       // If we are not already dragging and left mouse is pressed over the handle
-      if (!bAlreadyDragging && mousePressed && mouseButton == LEFT && m_bIsHovered) {
+      if (!bAlreadyDragging && app.mousePressed && app.mouseButton == app.LEFT && m_bIsHovered) {
         // GAME CHECK:
         /* Only the card in Color or Number zones can be dragged wether 
          is playing the colorkeeper or numberkeeper respectively */
         // println(" zone: "+zone);
-        if (!zone.equals("Color") && cplayer.equals("ck")) 
+        if (!zone.equals("Color") && app.cplayer.equals("ck")) 
           return;
-        if (!zone.equals("Number") && cplayer.equals("nk"))
+        if (!zone.equals("Number") && app.cplayer.equals("nk"))
           return;
 
         // We record the state
         m_bDragged = true;
         // And memorize the offset of the mouse position from the center of the handle
-        m_clickDX = mouseX - m_x;
-        m_clickDY = mouseY - m_y;
+        m_clickDX = app.mouseX - m_x;
+        m_clickDY = app.mouseY - m_y;
       }
 
-      if (mousePressed && mouseButton == RIGHT && m_bIsHovered) {
-        if ( (zone.equals("Color") && cplayer.equals("nk") && player_card_turnable) ||
-          (zone.equals("Number") && cplayer.equals("ck") && player_card_turnable) )
+      if (app.mousePressed && app.mouseButton == app.RIGHT && m_bIsHovered) {
+        if ( (zone.equals("Color") && app.cplayer.equals("nk") && player_card_turnable) ||
+          (zone.equals("Number") && app.cplayer.equals("ck") && player_card_turnable) )
           flipImg = !flipImg;
         else if (!cards_unturnable)
           flipImg = !flipImg;
       }
 
       // If mouse isn't pressed
-      if (!mousePressed ) {
+      if (!app.mousePressed ) {
         // Any possible dragging is stopped
         m_bDragged = false;
 
         boolean overAZone = false;
-        int my_zone_index = cards_zones_names.indexOf(this.zone );
+        int my_zone_index = app.cards_zones_names.indexOf(this.zone );
         int next_zone_index = -1;       
 
         /* we suppose a card can only cover a zone at a time */
-        for (int i = 0; i < HOME_CARDS_COORDINATES.length/2; i++) {
+        for (int i = 0; i < app.HOME_CARDS_COORDINATES.length/2; i++) {
           if (i == my_zone_index) continue;
 
-          if (m_x > HOME_CARDS_COORDINATES[i+i] && m_x < HOME_CARDS_COORDINATES[i+i] + width_img && 
-            m_y > HOME_CARDS_COORDINATES[i+i+1] && m_y < HOME_CARDS_COORDINATES[i+i+1] + height_img) {
+          if (m_x > app.HOME_CARDS_COORDINATES[i+i] && m_x < app.HOME_CARDS_COORDINATES[i+i] + width_img && 
+            m_y > app.HOME_CARDS_COORDINATES[i+i+1] && m_y < app.HOME_CARDS_COORDINATES[i+i+1] + height_img) {
             /* GAME CHECK: if it is an legal move */
-            if (allowed_moving_zones.contains(cards_zones_names.get(i))) { 
-              if ( cards_zones_names.get(i).equals("Target" )) { 
-                if ( ( cplayer.equals("ck" ) && hlist.get(zones_cards.get(cards_zones_names.get(i))).colorName.equals(this.colorName) ) ||
-                  ( ( cplayer.equals("nk" ) && hlist.get(zones_cards.get(cards_zones_names.get(i))).num == this.num )  ) 
+            if (app.allowed_moving_zones.contains(app.cards_zones_names.get(i))) { 
+              if ( app.cards_zones_names.get(i).equals("Target" )) { 
+                if ( ( app.cplayer.equals("ck" ) && app.hlist.get(app.zones_cards.get(app.cards_zones_names.get(i))).colorName.equals(this.colorName) ) ||
+                  ( ( app.cplayer.equals("nk" ) && app.hlist.get(app.zones_cards.get(app.cards_zones_names.get(i))).num == this.num )  ) 
                   )
                 { 
                   overAZone = true;
@@ -177,32 +180,33 @@ class PictureHandle
         }
 
         if (overAZone) {
-          relocating_zone = cards_zones_names.get(next_zone_index); // gets zone name from index
-          handHistory.append(ZONES_MOVES.get(relocating_zone) );
-          println("Player "+cplayer+ " moved: "+ZONES_MOVES.get(relocating_zone ) );
+          relocating_zone = app.cards_zones_names.get(next_zone_index); // gets zone name from index
+          app.handHistory.append(app.ZONES_MOVES.get(relocating_zone) );
+          //println("Player " + app.cplayer + " moved: "+app.ZONES_MOVES.get(relocating_zone ) );
           
           relocate(); // relocate myself
-          PictureHandle neighbor = hlist.get(zones_cards.get(relocating_zone )); // the card (by name) currently in the zone where we are moving 
+          PictureHandle neighbor = app.hlist.get(app.zones_cards.get(relocating_zone )); // the card (by name) currently in the zone where we are moving 
           neighbor.relocate(this.zone); // relocate the other onto my zone
 
           /* GAME CHECK: Player turn change and if the hand is ended: */
-          moves_counter++;
-          if (relocating_zone.equals("Target" ) && name.equals(current_target)) {
-            runs_counter++;
-            total_moves += moves_counter;
-            moves_counter = 0;
-            if (runs_counter > MAX_RUNS) { // Game ends
-              println("Game session ended.\n");
+          app.moves_counter++;
+          if (relocating_zone.equals("Target" ) && name.equals(app.current_target)) {
+            app.runs_counter++;
+            app.total_moves += app.moves_counter;
+            app.moves_counter = 0;
+            if (app.runs_counter > app.MAX_RUNS) { // Game ends
+              //println("Game session ended.\n");
+              // println();
               /* reset: */
-              total_moves=0;
-              runs_counter=0;
+              app.total_moves=0;
+              app.runs_counter=0;
             }
 
-            println("Hands successfull:\n"+handHistory.toString()+"\nGenerating a new hand.");
-            handHistory.setLength(0 ); // resets
-            replaceHandles(); // generate a new (random) run
-          } else if (cplayer.equals("ck" )) cplayer="nk";
-          else cplayer="ck";
+            //println("Hands successfull:\n"+app.handHistory.toString()+"\nGenerating a new hand.");
+            app.handHistory.setLength(0 ); // resets
+            app.replaceHandles(); // generate a new (random) run
+          } else if (app.cplayer.equals("ck" )) app.cplayer="nk";
+          else app.cplayer="ck";
         } else {
           // if it is not in its place, move to its previous position:
           relocate(zone);
@@ -222,13 +226,13 @@ class PictureHandle
 
   void relocate() {
     relocating = true;
-    int index = cards_zones_names.indexOf(relocating_zone);
-    float d = move(HOME_CARDS_COORDINATES[index+index], HOME_CARDS_COORDINATES[index+index+1]);
+    int index = app.cards_zones_names.indexOf(relocating_zone);
+    float d = move(app.HOME_CARDS_COORDINATES[index+index], app.HOME_CARDS_COORDINATES[index+index+1]);
     if (d < 1) {
       this.zone = relocating_zone;
       this.relocating = false;
       relocating_zone = "";
-      zones_cards.put(this.zone, name);
+      app.zones_cards.put(this.zone, name);
     }
   }
 
@@ -245,8 +249,8 @@ class PictureHandle
   {
     if (m_bDragged)
     {
-      m_x = mouseX - m_clickDX;
-      m_y = mouseY - m_clickDY;
+      m_x = app.mouseX - m_clickDX;
+      m_y = app.mouseY - m_clickDY;
     }
   }
 
@@ -263,7 +267,7 @@ class PictureHandle
     // With the above adjustments  x and y should never
     // be equal to x, y (i.e., Zeno's paradox)
     // so you just check once they're near enough...
-    float d = dist(m_x, m_y, x, y);
+    float d = app.dist(m_x, m_y, x, y);
     if (d < 1) {
       // Set a new target
       // In theory you could set up an array of targets for an icon to follow
@@ -280,22 +284,19 @@ class PictureHandle
    */
   void display()
   {
-    // strokeWeight(m_lineWidth);
     if (m_bDragged)
     {
-      //colorMode(m_colorDrag);
-      stroke(m_colorDrag);
-      rect(m_x-3, m_y-3, width_img+3, height_img+3, 3);
+      app.stroke(m_colorDrag);
+      app.rect(m_x-3, m_y-3, width_img+3, height_img+3, 3);
     } else if (m_bIsHovered)
     {
-      //colorMode(m_colorHover);
-      stroke(m_colorHover);
-      rect(m_x-3, m_y-3, width_img+3, height_img+3, 3);
+      app.stroke(m_colorHover);
+      app.rect(m_x-3, m_y-3, width_img+3, height_img+3, 3);
     }
     if (flipImg)
-      image(back_img, m_x, m_y, width_img, height_img);
+      app.image(back_img, m_x, m_y, width_img, height_img);
     else
-      image(front_img, m_x, m_y, width_img, height_img);
+      app.image(front_img, m_x, m_y, width_img, height_img);
   }
 
   /** Implements the local agent (active) behavior.

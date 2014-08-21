@@ -1,3 +1,7 @@
+import processing.core.PApplet;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Set;
 
 class Configuration {
 
@@ -6,14 +10,16 @@ class Configuration {
   String resource;
   private String[] lines;
   private HashMap<String, String> items;
-
-  Configuration() {
-    this(DEFAULT_RESOURCE);
+  private PApplet app = null; //reference to the Processing app engine
+  
+  Configuration(PApplet pa) {
+    this(pa, DEFAULT_RESOURCE);
   }
 
-  Configuration(String resource) {
+  Configuration(PApplet pa, String resource) {
     this.resource = resource;
-    lines = loadStrings(this.resource );
+    this.app = pa;
+    lines = pa.loadStrings(this.resource );
     items= new HashMap<String, String>();
     this.initialize();
   }
@@ -31,7 +37,7 @@ class Configuration {
   }
 
   String[] loadFile(String filename) {
-    return loadStrings(filename);  
+    return this.app.loadStrings(filename);  
   }
   
   

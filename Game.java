@@ -13,7 +13,7 @@ public abstract class Game {
 }
 
 
-public class TTT extends Game {
+ class TTT extends Game {
   final boolean[] TTT_COVERED_CARDS_CK = new boolean[] {false, false, true, true, false, true};
   final boolean[] TTT_COVERED_CARDS_NK = new boolean[] {true, false, false, true, false, true};
   final String PLAYER_FIRST = "ck"; // 'ck' or 'nk' are valid choices

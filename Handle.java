@@ -1,35 +1,38 @@
+import processing.core.PApplet;
+
 /**
- * A circle that can be dragged with the mouse.
+ * A rectangle that can be dragged with the mouse.
  */
-class Handle
+public class Handle
 {
   // Lazy (Processing) class: leave direct access to parameters... Avoids having lot of accessors.
   float m_x, m_y; // Position of handle
   int m_size; // Diameter of handle
   int m_lineWidth;
-  color m_colorLine;
-  color m_colorFill;
-  color m_colorHover;
-  color m_colorDrag;
-
+  int m_colorLine;
+  int m_colorFill;
+  int m_colorHover;
+  int m_colorDrag;
+  private PApplet app = null; //reference to the Processing app engine
   private boolean m_bIsHovered, m_bDragged;
   private float m_clickDX, m_clickDY;
 
   /**
    * Simple constructor with hopefully sensible defaults.
    */
-  Handle(float x, float y)
-  {
-    this(x, y, 5, 1, #000000, #FFFFFF, #FFFF00, #FF8800);
+  Handle(PApplet pa, float x, float y)
+  { 
+    this(pa, x, y, 5, 1, pa.color(0,0,0), pa.color(255,255,255), pa.color(255,255,0), pa.color(255,136,00));
   }
 
   /**
    * Full constructor.
    */
-  Handle(float x, float y, int size, int lineWidth,
-      color colorLine, color colorFill, color colorHover, color colorDrag
+  Handle(PApplet pa, float x, float y, int size, int lineWidth,
+      int colorLine, int colorFill, int colorHover, int colorDrag
   )
   {
+    this.app=pa;
     m_x = x; m_y = y;
     m_size = size;
     m_lineWidth = lineWidth;
@@ -48,18 +51,18 @@ class Handle
   void update(boolean bAlreadyDragging)
   {
     // Check if mouse is over the handle
-    m_bIsHovered = dist(mouseX, mouseY, m_x, m_y) <= m_size / 2;
+    m_bIsHovered = app.dist(app.mouseX, app.mouseY, m_x, m_y) <= m_size / 2;
     // If we are not already dragging and left mouse is pressed over the handle
-    if (!bAlreadyDragging && mousePressed && mouseButton == LEFT && m_bIsHovered)
+    if (!bAlreadyDragging && app.mousePressed && app.mouseButton == app.LEFT && m_bIsHovered)
     {
       // We record the state
       m_bDragged = true;
       // And memorize the offset of the mouse position from the center of the handle
-      m_clickDX = mouseX - m_x;
-      m_clickDY = mouseY - m_y;
+      m_clickDX = app.mouseX - m_x;
+      m_clickDY = app.mouseY - m_y;
     }
     // If mouse isn't pressed
-    if (!mousePressed)
+    if (!app.mousePressed)
     {
       // Any possible dragging is stopped
       m_bDragged = false;
@@ -79,8 +82,8 @@ class Handle
   {
     if (m_bDragged)
     {
-      m_x = mouseX - m_clickDX;
-      m_y = mouseY - m_clickDY;
+      m_x = app.mouseX - m_clickDX;
+      m_y = app.mouseY - m_clickDY;
     }
   }
 
@@ -89,21 +92,21 @@ class Handle
     */
   void display()
   {
-    strokeWeight(m_lineWidth);
-    stroke(m_colorLine);
+    app.strokeWeight(m_lineWidth);
+    app.stroke(m_colorLine);
     if (m_bDragged)
     {
-      fill(m_colorDrag);
+      app.fill(m_colorDrag);
     }
     else if (m_bIsHovered)
     {
-      fill(m_colorHover);
+      app.fill(m_colorHover);
     }
     else
     {
-      fill(m_colorFill);
+      app.fill(m_colorFill);
     }
 
-    ellipse(m_x, m_y, m_size, m_size);
+    app.ellipse(m_x, m_y, m_size, m_size);
   }
 }
